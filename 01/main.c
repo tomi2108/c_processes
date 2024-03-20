@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
     n = 1;
   } else {
     n = 6;
-    wait(&id);
+    wait(NULL);
   }
 
   for (int i = n; i < n + 5; i++) {
