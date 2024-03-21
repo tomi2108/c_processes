@@ -5,7 +5,7 @@
 void generate_process(int index, int ***fd, int n) {}
 
 int main(int argc, char *argv[]) {
-  printf("Input number of processes:\n");
+  printf("Input number of child processes:\n");
   int number_of_processes;
   scanf("%d", &number_of_processes);
 
@@ -33,6 +33,8 @@ int main(int argc, char *argv[]) {
       read(fd[process_index][0], &x, sizeof(int));
       x += 5;
       write(fd[next_process_index][1], &x, sizeof(int));
+      close(fd[process_index][0]);
+      close(fd[next_process_index][1]);
       return 0;
     }
     pids[process_index] = pid;
@@ -50,6 +52,8 @@ int main(int argc, char *argv[]) {
   int x = 0;
   write(fd[0][1], &x, sizeof(int));
   read(fd[number_of_processes][0], &x, sizeof(int));
+  close(fd[0][1]);
+  close(fd[number_of_processes][0]);
 
   for (int i = 0; i < number_of_processes; i++) {
     waitpid(pids[i], NULL, 0);
