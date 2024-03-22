@@ -41,8 +41,7 @@ void *producer(void *arg) {
     printf("%s (%02d): Posted %d\n", time, id, x);
     sleep(1);
   }
-  free(arg);
-  return NULL;
+  return arg;
 }
 
 void *consumer(void *arg) {
@@ -60,8 +59,7 @@ void *consumer(void *arg) {
     printf("%s (%02d): Consumed %d \n", time, id, y);
     sleep(1);
   }
-  free(arg);
-  return NULL;
+  return arg;
 }
 
 int main(int argc, char *argv[]) {
@@ -97,7 +95,9 @@ int main(int argc, char *argv[]) {
   }
 
   for (int j = 0; j < threads; j++) {
-    pthread_join(th[j], NULL);
+    int *res;
+    pthread_join(th[j], (void **)&res);
+    free(res);
   }
   sem_close(sem_empty);
   sem_close(sem_full);
