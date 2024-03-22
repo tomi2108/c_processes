@@ -14,9 +14,23 @@ pthread_mutex_t buffer_mutex;
 sem_t *sem_empty;
 sem_t *sem_full;
 
+void format_time(char *output) {
+  time_t raw_time;
+  struct tm *timeinfo;
+
+  time(&raw_time);
+  timeinfo = localtime(&raw_time);
+
+  sprintf(output, "[%02d/%02d/%d %02d:%02d:%02d]", timeinfo->tm_mday,
+          timeinfo->tm_mon + 1, timeinfo->tm_year + 1900, timeinfo->tm_hour,
+          timeinfo->tm_min, timeinfo->tm_sec);
+}
+
 void *producer(void *arg) {
   int id = *(int *)arg;
+  char time[30];
   while (1) {
+    format_time(time);
     int x = rand() % 99;
     sem_wait(sem_empty);
     pthread_mutex_lock(&buffer_mutex);
@@ -24,7 +38,7 @@ void *producer(void *arg) {
     count++;
     pthread_mutex_unlock(&buffer_mutex);
     sem_post(sem_full);
-    printf("(%02d): Posted %d\n", id, x);
+    printf("%s (%02d): Posted %d\n", time, id, x);
     sleep(1);
   }
   free(arg);
@@ -33,7 +47,9 @@ void *producer(void *arg) {
 
 void *consumer(void *arg) {
   int id = *(int *)arg;
+  char time[30];
   while (1) {
+    format_time(time);
     int y;
     sem_wait(sem_full);
     pthread_mutex_lock(&buffer_mutex);
@@ -41,7 +57,7 @@ void *consumer(void *arg) {
     y = buffer[count];
     pthread_mutex_unlock(&buffer_mutex);
     sem_post(sem_empty);
-    printf("(%02d): Consumed %d \n", id, y);
+    printf("%s (%02d): Consumed %d \n", time, id, y);
     sleep(1);
   }
   free(arg);
